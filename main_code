@@ -1,0 +1,39 @@
+use sha2::{Sha256, Digest};
+use std::env;
+use std::fs;
+
+fn main() {
+    // Get the file path or text input as argument
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        println!("Please provide a string or file path as an argument.");
+        return;
+    }
+
+    let input = &args[1];
+
+    // Check if the input is a file path
+    if std::path::Path::new(input).exists() {
+        // Read the file and calculate the hash
+        match fs::read(input) {
+            Ok(contents) => {
+                let hash = calculate_sha256(&contents);
+                println!("SHA-256 hash of the file: {}", hash);
+            },
+            Err(e) => eprintln!("Failed to read file: {}", e),
+        }
+    } else {
+        // Treat the input as a string
+        let hash = calculate_sha256(input.as_bytes());
+        println!("SHA-256 hash of the string: {}", hash);
+    }
+}
+
+// Function to calculate SHA-256 hash
+fn calculate_sha256(input: &[u8]) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(input);
+    let result = hasher.finalize();
+    format!("{:x}", result) // Format the hash as a hexadecimal string
+}
